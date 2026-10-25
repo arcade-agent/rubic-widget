@@ -1,0 +1,36 @@
+name: Architecture Health
+
+on:
+  push:
+    branches: [ arcade-ci ]
+  schedule:
+    - cron: '0 3 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Analyze Architecture
+        uses: arcade-agent/analyze-action@4db79fe26878a80405020f293fa478d42737c200 # v1.3.0
+        with:
+          source-path: '.'
+          language: 'typescript'
+          output-dir: 'public'
+          post-pr-comment: false
+          post-commit-comment: false
+          fail-on-smells: false
+
+      - name: Upload Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-report
+          path: 'public'
